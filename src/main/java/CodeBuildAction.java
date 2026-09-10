@@ -33,7 +33,12 @@ public class CodeBuildAction implements Action {
     private List<String> logs;
     private String cloudWatchLogsURL;
     private String s3LogsURL;
-    private List<BuildPhase> phases;
+    // BuildPhase is an AWS SDK model class. CodeBuildAction is attached to the Run, so this
+    // field is marshalled whenever build.xml is written, and Jenkins' XStream class filter
+    // refuses to serialize it. That failure is tolerated on most save paths but is rethrown
+    // by EnvActionImpl.setProperty, failing any build that assigns to env after this step.
+    // The phase list is only needed while the build is running, so keep it out of the record.
+    private transient List<BuildPhase> phases;
     private String phaseErrorMessage;
     private String startTime;
     private String currentPhase;
