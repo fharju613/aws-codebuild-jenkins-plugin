@@ -20,7 +20,6 @@ import com.cloudbees.hudson.plugins.folder.Folder;
 import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
-import com.google.inject.Inject;
 import enums.*;
 import hudson.*;
 import hudson.model.Item;
@@ -30,10 +29,11 @@ import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import lombok.Getter;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.Step;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -41,7 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CodeBuildStep extends AbstractStepImpl {
+public class CodeBuildStep extends Step {
 
     @Getter private String credentialsType;
     @Getter private String credentialsId;
@@ -144,6 +144,11 @@ public class CodeBuildStep extends AbstractStepImpl {
     @DataBoundConstructor
     public CodeBuildStep(String projectName) {
         this.projectName = projectName;
+    }
+
+    @Override
+    public StepExecution start(StepContext context) throws Exception {
+        return new CodeBuildExecution(context, this);
     }
 
     @DataBoundSetter
@@ -367,10 +372,11 @@ public class CodeBuildStep extends AbstractStepImpl {
     }
 
     @Extension
-    public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
+    public static final class DescriptorImpl extends StepDescriptor {
 
-        public DescriptorImpl() {
-            super(CodeBuildExecution.class);
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return Set.of(Run.class, FilePath.class, Launcher.class, TaskListener.class);
         }
 
         @Override
@@ -609,27 +615,24 @@ public class CodeBuildStep extends AbstractStepImpl {
         }
     }
 
-    public static final class CodeBuildExecution extends AbstractSynchronousNonBlockingStepExecution<CodeBuildResult> {
+    public static final class CodeBuildExecution extends SynchronousNonBlockingStepExecution<CodeBuildResult> {
 
         private static final long serialVersionUID = 1L;
 
-        @Inject
-        private transient CodeBuildStep step;
+        private final transient CodeBuildStep step;
 
-        @StepContextParameter
-        private transient Run run;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient Launcher launcher;
-
-        @StepContextParameter
-        private transient TaskListener listener;
+        CodeBuildExecution(StepContext context, CodeBuildStep step) {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected CodeBuildResult run() throws Exception {
+            final Run run = getContext().get(Run.class);
+            final FilePath ws = getContext().get(FilePath.class);
+            final Launcher launcher = getContext().get(Launcher.class);
+            final TaskListener listener = getContext().get(TaskListener.class);
+
             CodeBuilder builder = (CodeBuilder) new CodeBuilder(
                     step.getCredentialsType(), step.getCredentialsId(),
                     step.getProxyHost(), step.getProxyPort(),

@@ -43,7 +43,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -259,7 +259,7 @@ public class CodeBuilder extends Builder implements SimpleBuildStep {
         return this;
     }
 
-    public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath ws, @Nonnull Launcher launcher, @Nonnull TaskListener listener, StepContext stepContext) throws InterruptedException, IOException {
+    public void perform(@NonNull Run<?, ?> build, @NonNull FilePath ws, @NonNull Launcher launcher, @NonNull TaskListener listener, StepContext stepContext) throws InterruptedException, IOException {
         this.stepContext = stepContext;
         perform(build, ws, launcher, listener);
     }
@@ -268,7 +268,7 @@ public class CodeBuilder extends Builder implements SimpleBuildStep {
      * This is the Jenkins method that executes the actual build.
      */
     @Override
-    public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath ws, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@NonNull Run<?, ?> build, @NonNull FilePath ws, @NonNull Launcher launcher, @NonNull TaskListener listener) throws InterruptedException, IOException {
         descriptor = getDescriptor();
         envVars = build.getEnvironment(listener);
 
@@ -592,7 +592,7 @@ public class CodeBuilder extends Builder implements SimpleBuildStep {
         return;
     }
 
-    private void downloadArtifactsFromS3(@Nonnull TaskListener listener, AmazonS3Client s3Client, Build build, String artifactRoot) {
+    private void downloadArtifactsFromS3(@NonNull TaskListener listener, AmazonS3Client s3Client, Build build, String artifactRoot) {
         try {
             S3Downloader s3Downloader = new S3Downloader(s3Client);
             s3Downloader.downloadBuildArtifacts(listener, build, artifactRoot);

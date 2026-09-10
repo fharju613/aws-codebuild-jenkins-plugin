@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.50</version>
+        <version>6.2221.va_045130417c9</version>
     </parent>
 
     <groupId>com.amazonaws</groupId>
@@ -30,8 +30,7 @@
     <url>https://wiki.jenkins.io/display/JENKINS/AWS+CodeBuild+Plugin</url>
 
     <properties>
-        <jenkins.version>2.60.3</jenkins.version>
-        <java.level>8</java.level>
+        <jenkins.version>2.568.3</jenkins.version>
     </properties>
 
     <developers>
@@ -128,15 +127,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.2</version>
             </plugin>
@@ -150,31 +140,46 @@
         </repository>
     </distributionManagement>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- jaxb-impl arrives at 2.3.9 (javax, via aws-java-sdk-minimal -> jaxb) and 4.0.9
+                 (jakarta, via jackson2-api -> jakarta-xml-bind-api). Converge on the higher. -->
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>4.0.9</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-2.568.x</artifactId>
+                <version>7002.v028a_3607ddc8</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.12.80</version>
+            <version>1.12.780-480.v4a_0819121a_9e</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
-            <version>2.6.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>cloudbees-folder</artifactId>
-            <version>6.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>2.5</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>script-security</artifactId>
-            <version>1229.v4880b_b_e905a_6</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -187,17 +192,12 @@
             <artifactId>objenesis</artifactId>
             <version>3.0.1</version>
         </dependency>
+        <!-- Validation uses commons-lang 2.x (StringUtils, StringEscapeUtils). It used to arrive
+             transitively from Jenkins core, which no longer exposes it to plugin class loaders. -->
         <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>1.6.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-            <version>1.6.6</version>
-            <scope>test</scope>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
         </dependency>
         <dependency>
             <groupId>net.lingala.zip4j</groupId>
@@ -207,23 +207,8 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
+            <version>1.18.48</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.13.4.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.amazon.ion</groupId>
-            <artifactId>ion-java</artifactId>
-            <version>1.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.10.4</version>
         </dependency>
     </dependencies>
 </project>
